@@ -5,7 +5,7 @@ const config = {
 
   "support": [],
 
-  "token": "-Your Token Here-",
+  "token": "NDAwMzkyOTU0MjE4NTQ1MTY0.DTa-tg.xDSlSqaRLghHpOSe0-rlnYlp-8Y",
 
 
   "defaultSettings" : {

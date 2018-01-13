@@ -33,10 +33,14 @@ module.exports = (client, message) => {
 
   // Check whether the command, or alias, exist in the collections defined
   // in app.js.
-  const cmd = client.commands.get(command) || client.commands.get(client.aliases.get(command));
+  let cmd = client.commands.get(command) || client.commands.get(client.aliases.get(command));
   // using this const varName = thing OR otherthign; is a pretty efficient
   // and clean way to grab one of 2 values!
-  if (!cmd) return;
+  if (!cmd) {
+    cmd = client.bosscommands.get(command) || client.commands.get(client.bosscommandaliases.get(command));
+  }
+  
+  if (!cmd )return;
 
   // Some commands may not be useable in DMs. This check prevents those commands from running
   // and return a friendly error message.

@@ -8,9 +8,9 @@ module.exports = (client) => {
   command including the VERY DANGEROUS `eval` and `exec` commands!
   */
   client.permlevel = message => {
-    let permlvl = 0;
+    let permlvl = 9;
 
-    const permOrder = client.config.permLevels.slice(0).sort((p, c) => p.level < c.level ? 1 : -1);
+/*     const permOrder = client.config.permLevels.slice(0).sort((p, c) => p.level < c.level ? 1 : -1);
 
     while (permOrder.length) {
       const currentLevel = permOrder.shift();
@@ -19,7 +19,7 @@ module.exports = (client) => {
         permlvl = currentLevel.level;
         break;
       }
-    }
+    } */
     return permlvl;
   };
 
@@ -66,7 +66,7 @@ module.exports = (client) => {
 
   client.loadCommand = (commandName) => {
     try {
-      const props = require(`../commands/${commandName}`);
+      const props = require(`../commands/users/${commandName}`);
       client.logger.log(`Loading Command: ${props.help.name}. 👌`);
       if (props.init) {
         props.init(client);
@@ -93,20 +93,30 @@ module.exports = (client) => {
     if (command.shutdown) {
       await command.shutdown(client);
     }
-    delete require.cache[require.resolve(`../commands/${commandName}.js`)];
+    delete require.cache[require.resolve(`../commands/users/${commandName}.js`)];
     return false;
   };
 
   client.loadBoss = (bossName) => {
     try {
-      const props = require(`../commands/PVM/${bossName}`);
+      if (client.bosses.has(bossName)) {
+        boss = client.bosses.get(bossName);
+      } else if (client.bossaliases.has(bossName)) {
+        boss = client.bosses.get(client.bossaliases.get(bossName));
+        if(boss)
+        {
+          bossName = boss.info.filename;
+        }
+      }
+      const props = require(`../commands/users/PVM/${bossName}`);
       client.logger.log(`Loading boss: ${props.info.name}. 👌`);
       if (props.init) {
         props.init(client);
       }
-      client.bosses.set(props.info.name, props);
+      client.bosses.set(props.info.filename, props);
       props.info.aliases.forEach(alias => {
-        client.bossaliases.set(alias, props.info.name);
+        client.bossaliases.set(alias, props.info.filename);
+        client.logger.log(alias);
       });
       return false;
     } catch (e) {
@@ -120,13 +130,18 @@ module.exports = (client) => {
       boss = client.bosses.get(bossName);
     } else if (client.bossaliases.has(bossName)) {
       boss = client.bosses.get(client.bossaliases.get(bossName));
+      if(boss)
+      {
+        bossName = boss.info.filename;
+      }
     }
     if (!boss) return `The boss \`${bossName}\` doesn"t seem to exist, nor is it an alias. Try again!`;
 
     if (boss.shutdown) {
       await boss.shutdown(client);
     }
-    delete require.cache[require.resolve(`../commands/PVM/${bossName}.js`)];
+    client.logger.log(bossName);
+    delete require.cache[require.resolve('../commands/users/PVM/' + boss.info.filename + '.js')];
     return false;
   };
   /* MISCELANEOUS NON-CRITICAL FUNCTIONS */

@@ -10,11 +10,6 @@ const { promisify } = require("util");
 const readdir = promisify(require("fs").readdir);
 const Enmap = require("enmap");
 const EnmapLevel = require("enmap-level");
-const pg = require("pg");
-//const dbclient = new pgdatabase();
-
-//DB Connection String
-const conString = "postgres://B5TAAdmin:B5TA@localhost/B5TADB";
 
 
 bot.setMaxListeners(500);
@@ -22,10 +17,11 @@ bot.config = require("./config.js");
 bot.logger = require("./util/Logger");
 bot.commands = new Enmap();
 bot.aliases = new Enmap();
+bot.bosscommands = new Enmap();
+bot.bosscommandaliases = new Enmap();
 bot.bosses = new Enmap();
 bot.bossaliases = new Enmap();
-bot.database = require("pg");
-bot.dbConnectionString = conString;
+bot.fsreaddir = readdir;
 
 // Let's start by getting some useful functions that we'll use throughout
 // the bot, like logs and elevation features.
@@ -34,7 +30,7 @@ require("./util/functions.js")(bot);
 bot.settings = new Enmap({provider: new EnmapLevel({name: "settings"})});
 
 const init = async () => {
-  const cmdFiles = await readdir("./commands/");
+  const cmdFiles = await readdir("./commands/users");
   bot.logger.log(`Loading a total of ${cmdFiles.length} commands.`);
   cmdFiles.forEach(f => {
     if (!f.endsWith(".js")) return;
@@ -61,7 +57,7 @@ const init = async () => {
     bot.levelCache[thisLevel.name] = thisLevel.level;
   }
 
-  const bossFiles = await readdir("./commands/PVM/");
+  const bossFiles = await readdir("./commands/users/PVM/");
   bot.logger.log(`Loading a total of ${bossFiles.length} boss files.`);
   bossFiles.forEach(bs => {
     if (!bs.endsWith(".js")) return;
